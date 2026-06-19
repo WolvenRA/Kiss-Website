@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!-- Generator: Kiss Project -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duewy Kiss — Custom Computer Architecture</title>
+  <meta name="description" content="Duewy Kiss: a ground-up computer architecture featuring a custom ISA, assembler, linker, and VS Code IDE. 100-bit instructions, decimal-first arithmetic, designed for business computing.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="container">
+      <h1>Kiss System Architecture</h1>
+      <p class="tagline">A ground-up computer architecture — custom ISA, assembler, linker, and IDE</p>
+    </div>
+  </header>
+
+  <!-- ============ NAVIGATION ============ -->
+  <nav class="site-nav" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links">&#9776;</button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#toolchain">Toolchain</a></li>
+        <li><a href="#vscode">VS Code Extension</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="section" id="overview">
+    <div class="container">
+      <div class="section-title">
+        <h2>Overview</h2>
+        <p class="subtitle">What is Kiss?</p>
+      </div>
+      <div class="overview-content">
+        <p>
+          <strong>Kiss</strong> is a designed-from-scratch computer system. Not a modification 
+          of x86. Not a RISC-V variant. A clean-sheet architecture informed by 70 years of
+          computing lessons — taking the best ideas from the IBM AS/400, seL4, and combining 
+          them with original design decisions that prioritize correctness, clarity, and
+          real-world utility.
+        </p>
+        <p>
+          This is not an academic exercise. Kiss was designed with the goal of creating a system 
+          from the human perspective rather than being optimized for the silicon. While performance   
+          still matters, the primary design goals are ease of understanding, natural (1 based  
+          indexing, decimal math) ease of programming and low level abilities with high level 
+          functionality.
+        </p>
+
+        <div class="stat-row">
+          <div class="stat-block">
+            <span class="stat-value">100-bit</span>
+            <span class="stat-label">Instructions</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value">50-bit</span>
+            <span class="stat-label">Addressing</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value">10-bit</span>
+            <span class="stat-label">Bytes</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value">3</span>
+            <span class="stat-label">Data Types</span>
+          </div>
+        </div>
+
+        <p>
+          Three native data types — <strong>Binary</strong> (unsigned),
+          <strong>Integer</strong> (ones complement), and
+          <strong>Decimal</strong> (packed 5-bit digits) — each with dedicated ALU hardware.
+          No floating-point rounding surprises. Numbers work the way humans expect them to.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ============ ARCHITECTURE ============ -->
+  <section class="section" id="architecture">
+    <div class="container">
+      <div class="section-title">
+        <h2>Architecture</h2>
+        <p class="subtitle">Key differentiators that set Kiss apart</p>
+      </div>
+      <div class="arch-grid">
+
+        <div class="arch-card">
+          <h3>Decimal Arithmetic</h3>
+          <p>
+            Native decimal type with packed 5-bit digits and embedded decimal point.
+            No floating-point rounding errors. Three dedicated ALUs — decimal, integer, and
+            binary — each optimized for its type.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3>100-Bit Instructions</h3>
+          <p>
+            Every instruction is exactly 100 bits: 5&nbsp;Conditional Execution Bits + 
+            12&nbsp;opcode + 8&nbsp;Command Modifier Bits + 5&times;15-bit operands. 
+            Clean, consistent, no variable-length decoding. The decoder is simple because 
+            the format is simple.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3>Ones Complement, Sign&nbsp;Bit&nbsp;1&nbsp;=&nbsp;Positive</h3>
+          <p>
+            Knuth's insight applied: a subtractor ALU instead of an adder ALU eliminates 
+            virtually all negative zero results. Using 1 as the poitive sign bit gives  
+            monotonic ordering and allows universal unsigned compare. Integers and decimals 
+            sort naturally without type-specific comparison logic.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3>5-Way SMT, In-Order Execution</h3>
+          <p>
+            Threads hide memory latency instead of out-of-order speculation. Reclaimed
+            silicon budget goes to ALUs, registers, and caches — where it actually matters.
+            Simpler, more predictable, more efficient.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3>Dedicated Kernel Core</h3>
+          <p>
+            Application cores never enter kernel mode. No mode switches, no KPTI patches,
+            no interrupt preemption on app cores. Syscalls go through lightweight message
+            passing to the kernel core. Security by architecture, not by afterthought.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3>One-Based Everything</h3>
+          <p>
+            All indexing starts at 1. Zero is always an error sentinel — an uninitialized
+            pointer, an invalid index, a missing value. No more off-by-one bugs from
+            counting conventions that fight human intuition.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ============ TOOLCHAIN ============ -->
+  <section class="section" id="toolchain">
+    <div class="container">
+      <div class="section-title">
+        <h2>The Toolchain</h2>
+        <p class="subtitle">Assembler, linker, and execution engine</p>
+      </div>
+
+      <div class="toolchain-grid">
+
+        <div class="tool-block">
+          <h3>Assembler — kasm</h3>
+          <p class="pipeline">Lexer → Parser → Preprocessor → Encoder → Emitter</p>
+          <ul>
+            <li>590 mnemonics across 33 instruction families</li>
+            <li>Macros and conditional assembly (AsmIf)</li>
+            <li>File inclusion directives</li>
+            <li>Typed literals: <code>#B:</code>, <code>#I:</code>, <code>#D:</code>, <code>#A:</code></li>
+            <li>Data directives: Def Bin/Int/Dec/Bit/Txt/Sym</li>
+          </ul>
+        </div>
+
+        <div class="tool-block">
+          <h3>Linker — kiss-link</h3>
+          <ul>
+            <li>Separate compilation with Export/Import</li>
+            <li>Relocatable <code>.kobj</code> object files</li>
+            <li>Symbol resolution and address patching</li>
+            <li>Multi-module program assembly</li>
+          </ul>
+        </div>
+
+        <div class="tool-block">
+          <h3>Execution Engine</h3>
+          <ul>
+            <li>Full register model: 5 banks × 2000 bits</li>
+            <li>10 data stacks per thread</li>
+            <li>CEB conditional execution bits</li>
+            <li>Instruction-level simulation and tracing</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="code-block">
+        <span class="code-label">Kiss Assembly</span>
+        <code><span class="comment">// Add two integers</span>
+<span class="kw">Beg</span> <span class="label">@Main</span>
+
+<span class="label">@Main</span>
+    <span class="instr">SetVal</span> <span class="reg">R1WA</span> <span class="literal">#I:25</span>
+    <span class="instr">SetVal</span> <span class="reg">R2WA</span> <span class="literal">#I:17</span>
+    <span class="instr">I.Add</span>  <span class="reg">R1WA</span> <span class="reg">R2WA</span> <span class="reg">R3WA</span>
+    <span class="comment">// R3WA now holds 42</span>
+    <span class="instr">Brk</span></code>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ============ VS CODE EXTENSION ============ -->
+  <section class="section" id="vscode">
+    <div class="container">
+      <div class="section-title">
+        <h2>VS Code Extension</h2>
+        <p class="subtitle">Full IDE support for Kiss assembly</p>
+      </div>
+
+      <div class="feature-list">
+        <ul>
+          <li>Syntax highlighting for all 590 mnemonics</li>
+          <li>Hover documentation with syntax layouts and modifier info</li>
+          <li>Autocomplete for instructions, registers (6,479), and directives</li>
+          <li>Go-to-definition and Find References for labels</li>
+          <li>Auto-capitalize — type <code>jmp</code>, get <code>Jmp</code></li>
+          <li>Code snippets for common patterns</li>
+          <li>Build task integration with kasm</li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <span class="code-label">With Extension</span>
+        <code><span class="comment">// Decimal multiplication with overflow check</span>
+<span class="label">@CalcTotal</span>
+    <span class="instr">SetVal</span>  <span class="reg">R1WA</span> <span class="literal">#D:19.99</span>     <span class="comment">// unit price</span>
+    <span class="instr">SetVal</span>  <span class="reg">R2WA</span> <span class="literal">#D:150</span>       <span class="comment">// quantity</span>
+    <span class="instr">D.Mult</span>  <span class="reg">R1WA</span> <span class="reg">R2WA</span> <span class="reg">R3WA</span>      <span class="comment">// R3WA = 2998.50</span>
+    <span class="instr">D.Cmp</span>   <span class="reg">R3WA</span> <span class="literal">#D:99999.99</span>  <span class="comment">// overflow guard</span>
+    <span class="instr">Jmp.Gt</span>  <span class="label">@Overflow</span>
+  <span class="instr">Retrn</span></code>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ============ DOWNLOAD ============ -->
+  <section class="section" id="download">
+    <div class="container">
+      <div class="section-title">
+        <h2>Download</h2>
+        <p class="subtitle">Get started with Kiss</p>
+      </div>
+
+      <div class="download-note">
+        <h3>Kiss-100 and Kiss-50 Targets</h3>
+        <p>
+          Kiss-100 is the full-width architecture target: 100-bit instructions, 50-bit addressing,
+          five general-purpose register banks, and ten data stacks. Kiss-50 is the compact target:
+          50-bit instructions, 30-bit addressing, one or two register banks, one data stack, and
+          three compact operand slots. The assembler language is intentionally shared where possible;
+          Kiss-50 documentation focuses on the structural and encoding differences.
+        </p>
+      </div>
+
+      <div class="download-note">
+        <h3>Kiss-50 Downloads and Reference</h3>
+        <p>
+          If you are starting with Kiss-50, read the Kiss-50 differences guide first, then install K5VM.
+          The guide explains the compact register layout, reduced operand model, CMB differences, and
+          literal/materialization strategy without duplicating the full ISA and assembler manuals.
+          A dedicated Kiss-50 VS Code extension is available for <code>.k5asm</code> files.
+        </p>
+      </div>
+
+      <div class="download-grid">
+
+        <div class="download-card">
+          <h3>Kiss-100 VS Code Extension</h3>
+          <p>Syntax highlighting, autocomplete, hover docs, and build integration for Kiss-100 assembly.</p>
+          <a href="kiss-assembler-0.1.0.vsix" class="btn btn-primary">Download .vsix</a>
+        </div>
+
+        <div class="download-card">
+          <h3>Kiss-50 VS Code Extension</h3>
+          <p>Syntax highlighting, autocomplete, hover docs, and build-task templates for compact Kiss-50 assembly.</p>
+          <a href="kiss50-assembler-0.1.0.vsix" class="btn btn-primary">Download .vsix</a>
+        </div>
+
+        <div class="download-card">
+          <h3>K10VM — Kiss-100 Simulator</h3>
+          <p>Kiss-100 simulator downloads by operating system. Windows and Linux are available now; macOS is planned.</p>
+          <a href="downloads/K10VM-0.1.5-win-x64.msi" class="btn btn-primary">Windows MSI</a>
+          <a href="downloads/K10VM-0.1.2-linux-x64.tar.gz" class="btn">Linux x64 .tar.gz</a>
+          <span class="btn" aria-disabled="true">macOS Coming Soon</span>
+        </div>
+
+        <div class="download-card">
+          <h3>K5VM — Kiss-50 Simulator</h3>
+          <p>Compact Kiss-50 simulator. Windows MSI and Linux x64 packages are available; macOS is planned.</p>
+          <a href="downloads/K5VM-0.1.1-win-x64.msi" class="btn btn-primary">Windows MSI</a>
+          <a href="downloads/K5VM-0.1.1-linux-x64.tar.gz" class="btn">Linux x64 .tar.gz</a>
+          <a href="downloads/kiss50-differences.pdf" class="btn" target="_blank" rel="noopener noreferrer">Kiss-50 Guide PDF</a>
+          <a href="downloads/kiss50-differences.odt" class="btn">Kiss-50 Guide ODT</a>
+          <span class="btn" aria-disabled="true">macOS Coming Soon</span>
+        </div>
+
+        <div class="download-card">
+          <h3>ISA Manual</h3>
+          <p>Kiss architecture manual<br>100-bit instructions, three data types, register model, execution rules.</p>
+          <a href="downloads/kiss-isa-manual.pdf" class="btn btn-primary" target="_blank" rel="noopener noreferrer">View PDF</a>
+          <a href="downloads/kiss-isa-manual.odt" class="btn">Download ODT</a>
+        </div>
+
+        <div class="download-card">
+          <h3>ISA Commands Reference</h3>
+          <p>Per-command ISA reference<br>encoding, operand layout, and semantics for every instruction family.</p>
+          <a href="downloads/kiss-isa-commands.pdf" class="btn btn-primary" target="_blank" rel="noopener noreferrer">View PDF</a>
+          <a href="downloads/kiss-isa-commands.odt" class="btn">Download ODT</a>
+        </div>
+
+        <div class="download-card">
+          <h3>Assembler Manual</h3>
+          <p>Kiss assembly language manual<br>syntax, datatype prefixes, modifiers, macros, and directives.</p>
+          <a href="downloads/kiss-assembler-manual.pdf" class="btn btn-primary" target="_blank" rel="noopener noreferrer">View PDF</a>
+          <a href="downloads/kiss-assembler-manual.odt" class="btn">Download ODT</a>
+        </div>
+
+        <div class="download-card">
+          <h3>Assembler Commands Reference</h3>
+          <p>Per-command assembler reference<br>mnemonics, operand forms, and encodings for each instruction.</p>
+          <a href="downloads/kiss-assembler-commands.pdf" class="btn btn-primary" target="_blank" rel="noopener noreferrer">View PDF</a>
+          <a href="downloads/kiss-assembler-commands.odt" class="btn">Download ODT</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Wolven LLC. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/nav.js"></script>
+
+</body>
+</html>
